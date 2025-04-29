@@ -19,23 +19,13 @@ RUN apt-get update && \
 
 # Create a script for database connection check
 RUN echo '#!/bin/bash \n\
-host=$(echo $JDBC_DATABASE_URL | sed -E "s/jdbc:postgresql:\/\/([^:]+).*/\1/") \n\
-port=5432 \n\
-echo "Waiting for database connection at $host:$port..." \n\
-while ! nc -z $host $port; do \n\
-  echo "Database not available yet..." \n\
-  sleep 1 \n\
-done \n\
-echo "Database is available, starting application..." \n\
+echo "Starting application..." \n\
 exec java $JAVA_OPTS -jar app.jar \n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
-# Create data directory for persistence
-RUN mkdir -p /data
-VOLUME /data
-
-# The PORT environment variable is set by Fly.io
+# Environment variables for the application
 ENV PORT=8080
+ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 
 # Set the default Java options
